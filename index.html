@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>SwasthyaSetu AI</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f4f7fb;
+      color: #1f2937;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #0ea5e9, #2563eb);
+      color: white;
+      padding: 28px 20px;
+      text-align: center;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 32px;
+    }
+
+    .header p {
+      margin: 8px 0 0;
+      opacity: 0.9;
+    }
+
+    .container {
+      width: min(950px, 92%);
+      margin: 30px auto;
+    }
+
+    .card {
+      background: white;
+      border-radius: 18px;
+      padding: 25px;
+      margin-bottom: 22px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.07);
+    }
+
+    .upload-area {
+      border: 2px dashed #94a3b8;
+      border-radius: 15px;
+      padding: 30px;
+      text-align: center;
+    }
+
+    .upload-area h2 {
+      margin-top: 0;
+    }
+
+    input[type="file"] {
+      margin: 18px 0;
+      max-width: 100%;
+    }
+
+    #preview {
+      display: none;
+      max-width: 100%;
+      max-height: 350px;
+      margin: 15px auto;
+      border-radius: 12px;
+      border: 1px solid #ddd;
+    }
+
+    .buttons {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      border: none;
+      border-radius: 10px;
+      padding: 13px 22px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    #analyzeBtn {
+      background: #2563eb;
+      color: white;
+    }
+
+    #analyzeBtn:hover {
+      background: #1d4ed8;
+    }
+
+    #clearBtn {
+      background: #e5e7eb;
+      color: #111827;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    #loading {
+      display: none;
+      text-align: center;
+      margin-top: 20px;
+      font-weight: bold;
+      color: #2563eb;
+    }
+
+    #status {
+      display: none;
+      margin-top: 18px;
+      padding: 14px;
+      border-radius: 10px;
+    }
+
+    .success {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .error {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .result-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .medicine-card {
+      border: 1px solid #dbeafe;
+      border-radius: 14px;
+      padding: 20px;
+      margin-top: 15px;
+      background: #f8fbff;
+    }
+
+    .medicine-card h3 {
+      margin-top: 0;
+      color: #1d4ed8;
+    }
+
+    .label {
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .section {
+      margin-top: 15px;
+    }
+
+    .warning {
+      background: #fff7ed;
+      border: 1px solid #fed7aa;
+      color: #9a3412;
+      padding: 15px;
+      border-radius: 12px;
+      margin-top: 18px;
+    }
+
+    .safety {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      padding: 15px;
+      border-radius: 12px;
+      margin-top: 18px;
+    }
+
+    .empty {
+      color: #64748b;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .footer {
+      text-align: center;
+      color: #64748b;
+      font-size: 13px;
+      padding: 10px 20px 30px;
+    }
+
+    @media (max-width: 600px) {
+      .header h1 {
+        font-size: 25px;
+      }
+
+      .card {
+        padding: 18px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header class="header">
+    <h1>🩺 SwasthyaSetu AI</h1>
+    <p>AI-powered prescription explanation assistant</p>
+  </header>
+
+
+  <main class="container">
+
+    <!-- UPLOAD CARD -->
+    <section class="card">
+
+      <div class="upload-area">
+
+        <h2> Upload Prescription</h2>
+
+        <p>
+          Upload a clear prescription image for AI analysis.
+        </p>
+
+        <input
+          type="file"
+          id="prescription"
+          accept="image/*"
+        />
+
+        <img
+          id="preview"
+          alt="Prescription preview"
+        />
+
+        <div class="buttons">
+
+          <button id="analyzeBtn">
+             Analyze Prescription
+          </button>
+
+          <button id="clearBtn">
+             Clear
+          </button>
+
+        </div>
+
+        <div id="loading">
+           Reading prescription... Please wait.
+        </div>
+
+        <div id="status"></div>
+
+      </div>
+
+    </section>
+
+
+    <!-- RESULT CARD -->
+    <section
+      class="card"
+      id="resultCard"
+      style="display: none;"
+    >
+
+      <div class="result-header">
+
+        <h2> Prescription Analysis</h2>
+
+        <button id="printBtn">
+           Print
+        </button>
+
+      </div>
+
+      <div id="summary"></div>
+
+      <div id="medicines"></div>
+
+      <div id="unclear"></div>
+
+      <div id="safety"></div>
+
+    </section>
+
+  </main>
+
+
+  <footer class="footer">
+
+     AI-generated explanation only.
+    Always verify the original prescription with a qualified doctor
+    or pharmacist. Do not change medicines based only on AI output.
+
+  </footer>
+
+
+  <script>
+
+    const fileInput =
+      document.getElementById("prescription");
+
+    const preview =
+      document.getElementById("preview");
+
+    const analyzeBtn =
+      document.getElementById("analyzeBtn");
+
+    const clearBtn =
+      document.getElementById("clearBtn");
+
+    const loading =
+      document.getElementById("loading");
+
+    const status =
+      document.getElementById("status");
+
+    const resultCard =
+      document.getElementById("resultCard");
+
+    const medicinesDiv =
+      document.getElementById("medicines");
+
+    const unclearDiv =
+      document.getElementById("unclear");
+
+    const safetyDiv =
+      document.getElementById("safety");
+
+    const summaryDiv =
+      document.getElementById("summary");
+
+    const printBtn =
+      document.getElementById("printBtn");
+
+
+    // ==============================
+    // IMAGE PREVIEW
+    // ==============================
+
+    fileInput.addEventListener("change", () => {
+
+      const file = fileInput.files[0];
+
+      if (!file) {
+        preview.style.display = "none";
+        return;
+      }
+
+      if (!file.type.startsWith("image/")) {
+
+        showStatus(
+          "Please select an image file.",
+          "error"
+        );
+
+        fileInput.value = "";
+        return;
+      }
+
+      const reader = new FileReader();
+
+      reader.onload = function (event) {
+
+        preview.src = event.target.result;
+        preview.style.display = "block";
+
+      };
+
+      reader.readAsDataURL(file);
+
+      hideStatus();
+
+    });
+
+
+    // ==============================
+    // ANALYZE
+    // ==============================
+
+    analyzeBtn.addEventListener("click", async () => {
+
+      const file = fileInput.files[0];
+
+      if (!file) {
+
+        showStatus(
+          "Pehle prescription image select karo.",
+          "error"
+        );
+
+        return;
+      }
+
+
+      const formData = new FormData();
+
+      formData.append(
+        "prescription",
+        file
+      );
+
+      setLoading(true);
+
+      hideStatus();
+
+      resultCard.style.display = "none";
+
+      try {
+
+        const response = await fetch(
+          "/analyze-prescription",
+          {
+            method: "POST",
+            body: formData
+          }
+        );
+
+
+        const data = await response.json();
+
+
+        if (!response.ok) {
+
+          throw new Error(
+            data.error || "Analysis failed."
+          );
+
+        }
+
+
+        if (!data.success || !data.result) {
+
+          throw new Error(
+            "Invalid AI response."
+          );
+
+        }
+
+
+        displayResult(data.result);
+
+
+        showStatus(
+          " Prescription analyzed successfully.",
+          "success"
+        );
+
+
+      } catch (error) {
+
+        console.error(error);
+
+        showStatus(
+          " " + error.message,
+          "error"
+        );
+
+      } finally {
+
+        setLoading(false);
+
+      }
+
+    });
+
+
+    // ==============================
+    // DISPLAY RESULT
+    // ==============================
+
+    function displayResult(result) {
+
+      resultCard.style.display = "block";
+
+
+      const medicines =
+        Array.isArray(result.medicines)
+          ? result.medicines
+          : [];
+
+
+      const unclearItems =
+        Array.isArray(result.unclear_items)
+          ? result.unclear_items
+          : [];
+
+
+      // SUMMARY
+
+      summaryDiv.innerHTML = `
+        <div class="medicine-card">
+
+          <strong> Analysis Summary</strong>
+
+          <p>
+            Medicines detected:
+            <strong>${medicines.length}</strong>
+          </p>
+
+          <p>
+            Items needing verification:
+            <strong>${unclearItems.length}</strong>
+          </p>
+
+        </div>
+      `;
+
+
+      // MEDICINES
+
+      medicinesDiv.innerHTML = "";
+
+
+      if (medicines.length === 0) {
+
+        medicinesDiv.innerHTML = `
+          <div class="empty">
+            No clearly readable medicines were detected.
+          </div>
+        `;
+
+      } else {
+
+        medicines.forEach((medicine, index) => {
+
+          const card =
+            document.createElement("div");
+
+          card.className = "medicine-card";
+
+
+          card.innerHTML = `
+
+            <h3>
+               Medicine ${index + 1}
+            </h3>
+
+            <div class="section">
+
+              <div class="label">
+                Medicine Name
+              </div>
+
+              <div>
+                ${escapeHtml(
+                  medicine.name || "Unclear"
+                )}
+              </div>
+
+            </div>
+
+
+            <div class="section">
+
+              <div class="label">
+                 Written Instruction
+              </div>
+
+              <div>
+                ${escapeHtml(
+                  medicine.written_instruction ||
+                  "Not clearly readable"
+                )}
+              </div>
+
+            </div>
+
+
+            <div class="section">
+
+              <div class="label">
+                 Simple Explanation
+              </div>
+
+              <div>
+                ${escapeHtml(
+                  medicine.simple_explanation ||
+                  "No explanation available."
+                )}
+              </div>
+
+            </div>
+
+          `;
+
+
+          medicinesDiv.appendChild(card);
+
+        });
+
+      }
+
+
+      // UNCLEAR ITEMS
+
+      if (unclearItems.length > 0) {
+
+        unclearDiv.innerHTML = `
+
+          <div class="warning">
+
+            <strong>
+              ⚠️ Needs Verification
+            </strong>
+
+            <ul>
+
+              ${unclearItems
+                .map(
+                  item =>
+                    `<li>${escapeHtml(item)}</li>`
+                )
+                .join("")}
+
+            </ul>
+
+            <p>
+              Please verify these details against
+              the original prescription.
+            </p>
+
+          </div>
+
+        `;
+
+      } else {
+
+        unclearDiv.innerHTML = "";
+
+      }
+
+
+      // SAFETY NOTE
+
+      safetyDiv.innerHTML = `
+
+        <div class="safety">
+
+          <strong>
+            ℹ Safety Note
+          </strong>
+
+          <p>
+            ${escapeHtml(
+              result.safety_note ||
+              "Always verify the prescription with a qualified healthcare professional."
+            )}
+          </p>
+
+        </div>
+
+      `;
+
+    }
+
+
+    // ==============================
+    // CLEAR
+    // ==============================
+
+    clearBtn.addEventListener("click", () => {
+
+      fileInput.value = "";
+
+      preview.src = "";
+      preview.style.display = "none";
+
+      resultCard.style.display = "none";
+
+      medicinesDiv.innerHTML = "";
+      unclearDiv.innerHTML = "";
+      safetyDiv.innerHTML = "";
+      summaryDiv.innerHTML = "";
+
+      hideStatus();
+
+      setLoading(false);
+
+    });
+
+
+    // ==============================
+    // PRINT
+    // ==============================
+
+    printBtn.addEventListener("click", () => {
+
+      window.print();
+
+    });
+
+
+    // ==============================
+    // LOADING
+    // ==============================
+
+    function setLoading(isLoading) {
+
+      loading.style.display =
+        isLoading ? "block" : "none";
+
+      analyzeBtn.disabled =
+        isLoading;
+
+      clearBtn.disabled =
+        isLoading;
+
+      analyzeBtn.textContent =
+        isLoading
+          ? " Analyzing..."
+          : " Analyze Prescription";
+
+    }
+
+
+    // ==============================
+    // STATUS
+    // ==============================
+
+    function showStatus(message, type) {
+
+      status.textContent = message;
+
+      status.className = type;
+
+      status.style.display = "block";
+
+    }
+
+
+    function hideStatus() {
+
+      status.style.display = "none";
+
+      status.textContent = "";
+
+    }
+
+
+    // ==============================
+    // BASIC HTML ESCAPE
+    // ==============================
+
+    function escapeHtml(value) {
+
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+
+    }
+
+  </script>
+
+</body>
+</html>
